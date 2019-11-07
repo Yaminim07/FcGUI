@@ -42,12 +42,16 @@ var data,datacsv,selectedX="";
                         'drawComplete': function (e, d) {
                             parent = document.getElementById('main')
                             parent.addEventListener('click', handleClicks)
+                        },
+                        'rendered': function(e, d){
+                            chartObject = chart.getJSONData();
+                            cloneChart = chart.clone();
                         }
                     }
                 }).render()
+
                     createChartSelect();
-                    createXSelect();
-                    createYSelect();
+                    
             }
             )
             
@@ -62,7 +66,11 @@ var data,datacsv,selectedX="";
        // console.log(data);
 
     }
-    reader.readAsText(path.files[0])
+    if(path.files.length>0)
+    {
+        reader.readAsText(path.files[0])
+    }
+       
       
  }
  function createChartSelect(){
@@ -91,6 +99,8 @@ var data,datacsv,selectedX="";
         type = $(this).val();
         // csvJSONSingleSeries(datacsv);
         chart.chartType(type);
+        createXSelect();
+        createYSelect();
     });
 
     
