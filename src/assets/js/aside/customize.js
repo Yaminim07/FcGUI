@@ -89,13 +89,14 @@ function handleChartChanges() {
         let data_index = parentEvent.data.dataIndex
         let dataset_index = parentEvent.data.datasetIndex
         let data_property = value['id'].split('_')[1]
+
         if(value['inputFieldType'] === 'checkbox'){
             if(chartData.dataset)
             chartData.dataset[dataset_index].data[data_index][data_property] = (event.target.checked ? '1' : '0')
             else
             chartData.data[data_index][data_property] = (event.target.checked ? '1' : '0')
         }
-        else{
+        else {
             if(chartData.dataset)
             chartData.dataset[dataset_index].data[data_index][data_property] = event.target.value
             else
@@ -687,6 +688,8 @@ function levelDropdown(type, part){
     //add default features of 'chart' level
 
     const featuresBoxSkeleton = createFeaturesBox(part, 'chart')
+    console.log(featuresBoxSkeleton)
+
     dom.appendChild(render(featuresBoxSkeleton))
     
 }
