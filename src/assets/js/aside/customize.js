@@ -49,7 +49,6 @@ function createLabel(value) {
 }
 
 function handleChartChanges() {
-    // debugger
     const value = arguments[0]
     const event = arguments[1]
     function setAttr(label, value) {
@@ -145,7 +144,7 @@ function handleChartChanges() {
 
     }else{
         // console.log(value)
-        // console.log('please specify location')
+        console.log('please specify location')
     }
 }
 
@@ -529,6 +528,55 @@ function inputRange(value) {
     addNote(value, skeleton)
     return skeleton
 }
+function inputURL(value){
+    const skeleton= {
+        'parent': {
+            'name': 'li',
+            'property': {
+                'class': 'input'
+            },
+        },
+        'children': [{
+            'parent': {
+                'name': 'div'
+            },
+            'children': [{
+                'parent': createLabel(value)
+            }, {
+                'parent': {
+                    'name': 'input',
+                    'property': (() => {
+                        const skeleton = {
+                            'class': 'input-text',
+                            'id': value['id'],
+                            'type': 'url'
+                        }
+                        if (value['placeholder'].length !== 0) {
+                            skeleton['placeholder'] = value['placeholder']
+                        }
+                        if (value['value'] === 0) {
+                            // skeleton['value'] = will either have current value or will have 
+                            // default value
+                        }
+                        if (+value['defaultActive'] === 0 && !skeleton['value']) {
+                            skeleton['disabled'] = ''
+                        }
+                        if (value['willActivate']) {
+                            value.willActivate()
+                        }
+                        return skeleton
+                    })(),
+                    'event': function () {
+                        //this.addEventListener('input', (e) =>console.log(e.target.value))
+                        this.addEventListener('input', handleChartChanges.bind(null, value))
+                    }
+                }
+            }]
+        }]
+    }
+    addNote(value, skeleton)
+    return skeleton
+}
 
 function inputNumber(value) {
     const skeleton = {
@@ -619,6 +667,9 @@ function plotArea(type, part) {
                             } else if (value['inputFieldType'].toLowerCase() === 'checkbox') {
                                 children.push(inputCheckBox(value))
                             }
+                            else if(value['inputFieldType'].toLowerCase() === 'url') {
+                                children.push(inputURL(value))
+                            }
                         }
                         return children
                     })()
@@ -629,8 +680,52 @@ function plotArea(type, part) {
     }
 }
 
+function checkActive(e) {
+    const children = Array.from(e.target.parentElement.children)
+    for(let child of children) {
+        if (child.classList.contains('active-customize')) {
+            child.classList.remove('active-customize')
+            break
+        }
+    }
+    e.target.classList.add('active-customize')
+}
 function customize() {
-    const type = column2d
+    const chartType = chart.chartType()
+    var type
+    if (chartType === 'column2d') {
+        type = column2d
+    } else if (chartType === 'line') {
+        type = line
+    } else if (chartType === 'area2d') {
+        type = area2d
+    } else if (chartType === 'bar2d') {
+        type = bar2d
+    } else if (chartType === 'pie2d') {
+        type = pie2d
+    }
+    else if (chartType === 'pie3d') {
+        type = pie3d
+    }
+    else if (chartType === 'column3d') {
+        type = column3d
+    }
+    else if(chartType==='mscolumn2d'){
+        type=mscolumn2d
+    }
+    else if(chartType==='msbar2d'){
+        type=msbar2d
+    }
+    else if(chartType==='msbar3d'){
+        type=msbar3d
+    }
+    else if(chartType==='mscolumn3d'){
+        type=mscolumn3d
+    }
+    else if(chartType==='bar3d'){
+        type=bar3d
+    }
+
     const skeleton = {
         'parent': {
             'name': 'div',
@@ -656,6 +751,7 @@ function customize() {
                             },
                             'text': type[part]['name'],
                             'event': function () {
+                                this.addEventListener('click', checkActive)
                                  //if part=dataplot, then call other function in event listener
                                 if(part === 'dataplot')
                                 this.addEventListener('click', levelDropdown.bind(null, type, type[part]))
@@ -700,12 +796,9 @@ function levelDropdown(type, part){
     //prepare skeleton for level select
     const skeleton = LevelinputDropDown(value, part)
 
-    // delete skeleton.children[0].children[1].event
-
     // skeleton.children[0].children[1]['event'] = function(){
-    //     this.addEventListener('input', plotLevelArea.bind(null, part))
+    //     this.addEventListener('change', plotLevelArea.bind(null, part))
     // }()
-    
     
     dom.appendChild(render(skeleton))
 
@@ -751,7 +844,6 @@ function plotLevelArea(){
     }
 
     function addFeatures(){
-        // console.log(event)
         const skeleton1 = createFeaturesBox(part, event.target.value)
 
         //add it to customize-input-field
@@ -768,6 +860,7 @@ function plotLevelArea(){
 }
 
 function createFeaturesBox(part, level){
+  
     const values = part['properties'][level]
     const skeleton = {
         'parent': {
@@ -797,6 +890,9 @@ function createFeaturesBox(part, level){
                             children.push(inputColor(value))
                         } else if (value['inputFieldType'].toLowerCase() === 'checkbox') {
                             children.push(inputCheckBox(value))
+                        }
+                        else if(value['inputFieldType'].toLowerCase()==='url'){
+                            children.push(inputURL(value))
                         }
                     }
                     return children
@@ -841,7 +937,9 @@ function LevelinputDropDown(value, part) {
                         return skeleton
                     })(),
                     'event': function() {
-                        this.addEventListener('input', plotLevelArea.bind(null, part))
+
+                        this.addEventListener('change', plotLevelArea.bind(null, part))
+                        
                     }
                 },
                 'children': (() => {
