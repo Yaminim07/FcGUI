@@ -7,6 +7,7 @@ function handleClicks(e, parent) {
         asideCustomize.click()
     }
     if (parent) {
+        console.log(parent)
         if (e.type === 'dataplotclick') {
             document.querySelector('.dataplot').click()
             outputString = e.data.value

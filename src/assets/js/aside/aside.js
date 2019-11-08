@@ -124,6 +124,7 @@ function aside() {
                         // will open a different width
                         // will add class
                         this.addEventListener('click', (e) => {
+                            parentEvent = ''
                             if (showHideDetail(e) === 1) {
                                 customize(e)
                             }
