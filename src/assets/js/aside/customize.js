@@ -51,26 +51,24 @@ function createLabel(value) {
 function handleChartChanges() {
     const value = arguments[0]
     const event = arguments[1]
+
     function setAttr(label, value) {
-        /*chart.setChartAttribute(label, value)
-        chartObject = chart.getJSONData()*/
-        //chart.setJSONData(filterLink())
         chartObject['chart'][label] = value
         if (label !== 'clickURL') {
             chart.setChartAttribute(label, value)
         }
     }
+
     if (value['location'] === 'chart') {
         let chartData = chartObject
-        // let chartData = chart.getJSONData()
+
         //remove series and data level dependencies
         if(chartData.dataset){  // multiseries
 
-            // find data and series level attribute
             let data_attr = getConflictingAttributes('chart', value['id'].split('_')[1], 'data')
             let series_attr = getConflictingAttributes('chart', value['id'].split('_')[1], 'series')
 
-            // loop over chartdata.dataset , remove seriesAttr
+            // loop over chartdata, remove conflicting series attribute
 
             for(let i = 0;i < chartData.dataset.length; i++){
                 delete chartData.dataset[i][series_attr]
@@ -80,6 +78,7 @@ function handleChartChanges() {
                     delete chartData.dataset[i].data[j][data_attr]
                 }
             }
+
         }else{
             // find conflicting attribute
             let data_attr = getConflictingAttributes('chart', value['id'].split('_')[1], 'data')
@@ -87,7 +86,6 @@ function handleChartChanges() {
             for(let i = 0;i < chartData.data.length; i++){
                 //remove dataAttr
                 delete chartData.data[i][data_attr]
-
             }
         }
         chart.setJSONData(filterLink())
@@ -96,7 +94,26 @@ function handleChartChanges() {
         } else {
             setAttr(value['id'].split('_')[1], event.target.value)
         }
-    } else if (value['location'] === 'data') {
+    } else if (value['location'] === 'series'){
+        let chartData = chartObject
+
+        //remove data related conflicting attributes
+        let data_attr = getConflictingAttributes('series', value['id'].split('_')[1], 'data')
+        let dataset_index = parentEvent.data.datasetIndex
+        //loop over chartData, remove data conflicting sttributes
+
+        for(let i = 0;i < chartData.dataset[dataset_index].data.length; i++){
+            delete chartData.dataset[dataset_index].data[i][data_attr]
+        }
+       
+        let data_property = value['id'].split('_')[1]
+        if(value['inputFieldType'] === 'checkbox')
+        chartData.dataset[dataset_index][data_property] = (event.target.checked ? '1' : '0')
+        else
+        chartData.dataset[dataset_index][data_property]  = event.target.value 
+        chart.setJSONData(filterLink()) 
+
+    }else if (value['location'] === 'data') {
         //take json data
         //update JSON data
         //set chart data to updated JSON
@@ -117,33 +134,8 @@ function handleChartChanges() {
             else
             chartData.data[data_index][data_property] = event.target.value
         } 
-        // chart.setJSONData(chartData)
         chart.setJSONData(filterLink()) 
-
-    }
-    else if (value['location'] === 'series'){
-        let chartData = chartObject
-
-        //remove data related conflicting attributes
-        let data_attr = getConflictingAttributes('series', value['id'].split('_')[1], 'data')
-        let dataset_index = parentEvent.data.datasetIndex
-        let data_index = parentEvent.data.dataIndex
-        //loop over chartData.data
-        for(let i = 0;i < chartData.dataset[dataset_index].data.length; i++){
-            //remove chartdata.data[index].dataAttr
-            delete chartData.dataset[dataset_index].data[i][data_attr]
-        }
-       
-        let data_property = value['id'].split('_')[1]
-        if(value['inputFieldType'] === 'checkbox')
-        chartData.dataset[dataset_index][data_property] = (event.target.checked ? '1' : '0')
-        else
-        chartData.dataset[dataset_index][data_property]  = event.target.value 
-        // chart.setJSONData(chartData)
-        chart.setJSONData(filterLink()) 
-
     }else{
-        // console.log(value)
         console.log('please specify location')
     }
 }
